@@ -58,22 +58,40 @@ let startListener = () => {
         let qt = document.querySelector('#quantity').value
         console.log(qt)
         
-        let panier = JSON.parse(localStorage.getItem('panier'))
+        let panier = JSON.parse(localStorage.getItem('panier')) ||[]
         console.log(panier)   
         
         let choix = {
             id: id,
             color: cl,
-            quantity: qt
+            quantity: parseInt(qt)
         }        
 
-        panier.push(choix)
-
-      localStorage.setItem('panier', JSON.stringify(panier))
-      console.log(JSON.stringify(panier));
+        // panier.push(choix)
 
 
-    })
+
+
+        //  
+
+        let search = panier.findIndex(p => p.id === id && p.color === cl)
+        console.log(search)
+
+   
+        if(search === -1){
+            console.log('dans le -1')
+            panier.push(choix)
+        } else{
+            console.log('dans autre')
+            panier[search].quantity += parseInt(qt)
+        }  console.log(panier);
+        
+
+        localStorage.setItem('panier', JSON.stringify(panier)) 
+        console.log(JSON.stringify(panier));
+    }
+
+    )
  
 }
     
@@ -91,6 +109,3 @@ window.addEventListener('load', getProduct)
 4- Envoie au localStorage
 
 */
-
-
-
