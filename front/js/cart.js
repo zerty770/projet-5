@@ -1,6 +1,4 @@
 // 1 recuperer les info produit
-
-
 //pointer l'endroie ou ajouter les elements
 
 
@@ -10,185 +8,298 @@ console.log(container)
 let totalP = 0
 let totalQ = 0
 
-let displayPanier = () => {
+let displayPanier = async () => {
   const panier = JSON.parse(localStorage.getItem('panier'))
   const url = 'http://localhost:3000/api/products/'
   console.log(panier);
 
   // Vérification, si le panier est vide 
   // Si oui - retour page d'accueil
-  if(panier.length == 0){
+  if (panier.length == 0) {
     alert('votre panier est vide')
     window.location.href = 'index.html'
   }
 
-  for(item of panier){
-    console.log(item);
+  for (item of panier) {
+
     // Pour chaque item (donc en fait chaque produit) aller sur l'api récup le prix
-        // ensuite insertAdjacentHTML
+    // ensuite insertAdjacentHTML
+    try{
+    let blob = await fetch('http://localhost:3000/api/products/' + item.id)
+    let data = await blob.json()
+      
 
-    fetch('http://localhost:3000/api/products/'+item.id)
-      .then(panier => panier.json())
-      .then(data => { 
-          console.log(data)
-
-          container.insertAdjacentHTML("beforeend",`
-          <article class="cart__item" data-id="${item.id}" data-color="${item.color}" > 
-                  <div class="cart__item__img">
-                    <img src="${data.imageUrl}" alt="${data.altTxt}">
+    container.insertAdjacentHTML("beforeend", `
+      <article class="cart__item" data-id="${item.id}" data-color="${item.color}" > 
+              <div class="cart__item__img">
+                <img src="${data.imageUrl}" alt="${data.altTxt}">
+              </div>
+              <div class="cart__item__content">
+                <div class="cart__item__content__description">
+                  <h2>${data.name}</h2>
+                  <p>${item.color}</p>
+                  <p>${data.price}€</p>
+                </div>
+                <div class="cart__item__content__settings">
+                  <div class="cart__item__content__settings__quantity">
+                    <p>Qté : </p>
+                    <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${item.quantity}">
                   </div>
-                  <div class="cart__item__content">
-                    <div class="cart__item__content__description">
-                      <h2>${data.name}</h2>
-                      <p>${item.color}</p>
-                      <p>${data.price}€</p>
-                    </div>
-                    <div class="cart__item__content__settings">
-                      <div class="cart__item__content__settings__quantity">
-                        <p>Qté : </p>
-                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${item.quantity}">
-                      </div>
-                      <div class="cart__item__content__settings__delete">
-                        <p class="deleteItem">Supprimer</p>
-                      </div>
-                    </div>
+                  <div class="cart__item__content__settings__delete">
+                    <p class="deleteItem">Supprimer</p>
                   </div>
-                </article> 
-          `)
+                </div>
+              </div>
+            </article> 
+      `)
 
-          totalP += data.price * item.quantity
-          totalQ += item.quantity
-          displayTotal()
-          //Supprimer()
-          modifier()
- 
-          console.log(item.id);
-          console.log(item.color);
-          console.log('findiplaypanier');
+    totalP += parseInt(data.price * item.quantity)
+    totalQ += parseInt(item.quantity)
+    displayTotal()
 
-      })
-      .catch(err => console.log(err))
+
+
+
+    }catch(err){
+      console.log(err)
+    } 
   }
+  Supprimer()
+  modifier()
+  viericationFormulaire()
 }
 
 let displayTotal = () => {
-  document.querySelector('#totalPrice').textContent = totalP 
+  document.querySelector('#totalPrice').textContent = totalP
   console.log(document.querySelector('#totalPrice').textContent);
 
   document.querySelector('#totalQuantity').textContent = totalQ
   console.log(document.querySelector('#totalQuantity').textContent)
 }
 
-/*let Supprimer = () => {
-  console.log('start delete');
-  const panier = JSON.parse(localStorage.getItem('panier'))
+let Supprimer = () => {
+
   let elements = document.querySelectorAll('.deleteItem') 
   elements.forEach(btn => {
       btn.addEventListener('click', e=>{
-      let article = e.target.closest('article')
-      panier.supprimerProduit(article.dataset.id, article.dataset.color)
-      article.remove()
+        let article = e.target.closest('article')
+        supprimerProduit(article.dataset.id, article.dataset.color)
+        article.remove()
       })
   })
 }
 
-  let supprimerProduit = (id,color) => {
-    const panier = JSON.parse(localStorage.getItem('panier'))
+let supprimerProduit = (id,color) => {
+  const panier = JSON.parse(localStorage.getItem('panier'))
 
-    //recherche id
-    let search = panier.findIndex(p => p.id === id && p.color === color)
-  
+  //recherche id
+  let search = panier.findIndex(p => p.id === id && p.color === color)
 
-    //recup produit
-    let product = this.fetch('http://localhost:3000/api/products/'+ item.id)
+
+  //recup produit
+  fetch('http://localhost:3000/api/products/'+ id)
     .then(test => test.json())
-    .then(donne => { 
-        console.log(donne)
+    .then(product => { 
+        console.log(product)
+        //mise a jour
+        miseAJour(
+          -(panier[search].quantity),
+          parseInt(product.price)
+        )
+
+        displayTotal()
+
+        panier.splice(panier.findIndex(p => p.id === id && p.color === color ),1)
+
+        sauvegarde(panier)  
+        
+
     })
+    .catch(err => console.log(err))
+}
 
-    //mise a jour
-    this.miseAJour(
-      -(this.panier[search].quantity),
-      product.price
-    )
+let miseAJour = (quantity, price) => {
+ 
+  totalQ += quantity
+  totalP += (quantity * price)
+  console.log(quantity, price)
+  console.log(totalP, totalQ)
+}
 
-    displayTotal()
+let sauvegarde = (panier) => {
 
-    this.panier.splice(this.panier.findIndex(p => p.id === article._id && p.color === color ),1)
+  // const panier = JSON.parse(localStorage.getItem('panier'))
+  localStorage.setItem('panier', JSON.stringify(panier))
+  console.log(JSON.stringify(panier));
+}
 
-    sauvegarde()  
-    
-    console.log(SupprimerProduit);
-  }*/
+let viderPanier = () => {
+  localStorage.removeItem('panier')
+}
 
-  let miseAJour = (quantity, price) => {
-    this.totalP += quantity
-    this.totalQ += (quantity * price)
-  }
+let modifier = () => {
 
-  let sauvegarde = () => {
+  let inputs = document.querySelectorAll('.itemQuantity')
+  for (let input of inputs) {
+
+    //recup localstorage   
     const panier = JSON.parse(localStorage.getItem('panier'))
-    localStorage.setItem('panier', JSON.stringify(panier)) 
-    console.log(JSON.stringify(panier));
-  }
 
-  let viderPanier = () => {
-    localStorage.removeItem('panier')
-    console.log(localStorage.removeItem('panier'));
-  }
+    
 
-  let modifier = () => {
-
-    let inputs = document.querySelectorAll('.itemQuantity')
-    for(let input of inputs){   
+    input.addEventListener('change', e => {
+      let article = e.target.closest('article') // c'est l'input
       
-      //recup localstorage   
-      const panier = JSON.parse(localStorage.getItem('panier'))
-
-      newQt = input.value
-
-      input.addEventListener('change', e => {
-      let article = e.target.closest('article').dataset.id // c'est l'input
+      newQt = parseInt(e.target.value)
 
       //recup produit
-      let product = this.fetch('http://localhost:3000/api/products/'+ item.id)
-      .then(test => test.json())
-      .then(data => { 
-      console.log(data)
-      }) 
+      fetch('http://localhost:3000/api/products/'+ article.dataset.id)
+        .then(test => test.json())
+        .then(product => { 
+            console.log(product)
+            
 
-      let search = panier.findIndex(p => p.id === article.dataset.id && p.color === article.dataset.color) 
-      console.log('cooucou');
+            let search = panier.findIndex(p => p.id === article.dataset.id && p.color === article.dataset.color)
 
-      // ajout de quantité
-      if(newQt > this.panier[search].quantity){
-        let difference = newQt - this.panier[search].quantity
+            // ajout de quantité
+            if (newQt > panier[search].quantity) {
+              console.log('je suis dans le +')
+              let difference = newQt - panier[search].quantity
 
-        //mise a jour des quantités
-        this.miseAJour(difference, product.price)
-        displayTotal()
-        
-        //mise a jour panier
-        this.panier[search].quantity = newQt
+              //mise a jour des quantités
+              miseAJour(difference, parseInt(product.price))
+              displayTotal()
 
-      }
-      //diminution d'article
-      if(input < this.panier[search].quantity){
-        let difference =  this.panier[search].quantity - newQt}
+              //mise a jour panier
+              panier[search].quantity = newQt
 
-        this.miseAJour(-difference, product.price)
-        displayTotal()
+            }
+            //diminution d'article
+            if (newQt < panier[search].quantity) {
+              let difference = panier[search].quantity - newQt
+              console.log('je suis dans le moin');
+              miseAJour(-difference, parseInt(product.price))
+              displayTotal()
 
-        //mise a jour panier
-        this.panier[search].quantity = newQt        
-      })
+              //mise a jour panier
+              panier[search].quantity = newQt
+            }
 
-      sauvegarde()
+            sauvegarde(panier)
+        })
+        .catch(err => console.log(err))        
+    })
+    
 
-  console.log(input);
-    }
 
   }
+
+}
+
+let viericationFormulaire =  () => {
+  document.querySelector('#order').addEventListener('click', e =>{
+    e.preventDefault()
+
+    //definition expression reguliere
+    let regEmail = /^\w+([.-]?\w+)*@\w+([.-]?\w+)(.\w{2,3})+$/i
+    let regName = /^[a-zA-Z\s'-]+$/i
+    let regAdresse = /^[a-z0-9/s'-]*$/i
+    let regCity = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/i
+
+
+    // recuperation HTML du formulaire
+    let form = e.target.closest('form').elements
+    console.log(form);
+
+    //flag valiation
+    let flag = true
+
+    // validation des champs
+    if(!regName.test(form['firstName'].value)){
+      form['firstName'].nextElementSibling.textContent = `Prénom invalide !`
+      flag = false
+    }else{
+      form['firstName'].nextElementSibling.textContent = ``
+      flag = true
+    }
+
+    if(!regName.test(form['lastName'].value)){
+      form['lastName'].nextElementSibling.textContent = `Nom invalide !`
+      flag = false
+    }else{
+      form['lastName'].nextElementSibling.textContent = ``
+      flag = true
+    }
+
+    if(!regAdresse.test(form['address'].value)){
+      form['address'].nextElementSibling.textContent = `Adresse invalide !`
+      flag = false
+    }else{
+      form['address'].nextElementSibling.textContent = ``
+      flag = true
+    }
+
+    if(!regCity.test(form['city'].value)){
+      form['city'].nextElementSibling.textContent = `Ville invalide !`
+      flag = false
+    }else{
+      form['city'].nextElementSibling.textContent = ``
+      flag = true
+    }
+
+    if(!regEmail.test(form['email'].value)){
+      form['email'].nextElementSibling.textContent = `Mail invalide !`
+      flag = false
+    }else{
+      form['email'].nextElementSibling.textContent = ``
+      flag = true
+    }
+
+    //Formulaire erreur
+    if(!flag){
+      return false
+    }
+
+    // envoie de la commande
+      const panier = JSON.parse(localStorage.getItem('panier'))
+    
+      let order = {
+        contact: {
+          firstName: form['firstName'].value,
+          lastName: form['lastName'].value,
+          address: form['address'].value,
+          city: form['city'].value,
+          email: form['email'].value
+        },
+        products: panier.map(p => p.id)
+      }
+      console.log(order);
+    
+      let enTete = {
+        method: "POST",
+        body: JSON.stringify(order),
+        Headers: {
+          Accept: "application/json",
+          "Content-Type": "application.json"
+        }
+      }
+    
+      fetch('http://localhost:3000/api/products/order', enTete)
+        .then(cmd => cmd.json())
+        .then(cmdId => { 
+          viderPanier()
+          console.log(cmdId);
+          //window.location.href= 'confirmation.html?id='+cmdId
+        })
+        .catch(err => console.log(err))
+    
+      console.log('send commande');
+
+  })
+}
+
+
+
 
 
 window.addEventListener('load', displayPanier)
@@ -216,8 +327,8 @@ window.addEventListener('load', displayPanier)
 
 
 
-        
 
 
 
-        
+
+
