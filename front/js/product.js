@@ -1,9 +1,3 @@
-// 1 - Récupérer l'id de l'article qui est dans l'imageUrl
-// 2 - Appeler l'API avec la bonne url pour récupérer LE produit
-// 3 - Injecter les information dans le DOM
-
-
-
 // recuperer l'id du produit dans L'url
 const urlId = window.location.search
 console.log(urlId)
@@ -11,9 +5,8 @@ console.log(urlId)
 const id = urlId.slice(4)
 console.log(id);
 
-/**
- * Fonction de récupération du proiduit et mise en place dans le DOM
- */
+
+ //Fonction de récupération du produit et mise en place dans le DOM
 let getProduct = () => {
 
     let container = document.querySelector('#colors')
@@ -25,9 +18,9 @@ let getProduct = () => {
         .then(data => {
             console.log(data)
             
-            document.querySelector('.item__img') .innerHTML = `<img src="${data.imageUrl}" alt="${data.altTxt}">`
+            document.querySelector('.item__img').innerHTML = `<img src="${data.imageUrl}" alt="${data.altTxt}">`
             document.querySelector('#title').innerHTML = data.name
-            document.querySelector('#price') .innerHTML = data.price
+            document.querySelector('#price').innerHTML = data.price
             document.querySelector('#description').innerHTML = data.description
             document.querySelector('title').textContent = data.name;
 
@@ -47,37 +40,34 @@ let getProduct = () => {
     startListener()
 }
 
+//mise en place de l'ecout du clique et de l'envoie au panier
 let startListener = () => {
-    //envoie des informations produit au panier
-
+    
+    //écout du click
     document.getElementById("addToCart").addEventListener('click', () => {
-        // 1 récupérer les infos sélectionnée (id, couleur, quantité)
+        
         let cl = document.getElementById('colors').value
         console.log(cl);
 
         let qt = document.querySelector('#quantity').value
         console.log(qt)
         
+        // mettre le panier en chaine de character
         let panier = JSON.parse(localStorage.getItem('panier')) ||[]
         console.log(panier)   
         
+        // 
         let choix = {
             id: id,
             color: cl,
             quantity: parseInt(qt)
-        }        
+        }         
 
-        // panier.push(choix)
-
-
-
-
-        //  
-
+        //condition de recherche d'objet identique 
         let search = panier.findIndex(p => p.id === id && p.color === cl)
         console.log(search)
 
-   
+        //mise en place du push au apnier
         if(search === -1){
             console.log('dans le -1')
             panier.push(choix)
@@ -86,7 +76,7 @@ let startListener = () => {
             panier[search].quantity += parseInt(qt)
         }  console.log(panier);
         
-
+        //mettre le panier en chaine json
         localStorage.setItem('panier', JSON.stringify(panier)) 
         console.log(JSON.stringify(panier));
     }

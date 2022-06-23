@@ -1,7 +1,3 @@
-// 1 - récupérer les produits
-// 2 - parcours les produits et les ajouter dans l'html
-
-
 let start = () => {
 
     // Pointer dans le DOM - pour liste produit

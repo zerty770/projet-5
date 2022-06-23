@@ -15,11 +15,20 @@ let displayPanier = async () => {
 
   // Vérification, si le panier est vide 
   // Si oui - retour page d'accueil
-  if (panier.length == 0) {
+
+  //si panier n'existe pas 
+  if (panier === null){
     alert('votre panier est vide')
     window.location.href = 'index.html'
   }
 
+  //si le panier ne contient pas d'article
+  if (panier.length === 0) {
+    alert('votre panier est vide')
+    window.location.href = 'index.html'
+  }
+
+  //affichage des article de panier
   for (item of panier) {
 
     // Pour chaque item (donc en fait chaque produit) aller sur l'api récup le prix
