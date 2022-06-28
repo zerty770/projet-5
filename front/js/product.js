@@ -56,7 +56,6 @@ let startListener = () => {
         let panier = JSON.parse(localStorage.getItem('panier')) ||[]
         console.log(panier)   
         
-        // 
         let choix = {
             id: id,
             color: cl,
