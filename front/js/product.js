@@ -32,7 +32,6 @@ let getProduct = () => {
                     <option value="${item}">${item}</option>
                 `)
             }
-
             console.log(colors)
         })
         .catch(err => console.log(err))
