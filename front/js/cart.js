@@ -72,7 +72,7 @@ let displayPanier = async () => {
   // Appel des fonctions d'écoute d'évennement
   Supprimer()
   modifier()
-  viericationFormulaire()
+  verificationFormulaire()
 }
 
 // Affichage des totaux
@@ -203,7 +203,7 @@ let modifier = () => {
 }
 
 // Ecoute de la soumission du formulaire et test des champs
-let viericationFormulaire =  () => {
+let verificationFormulaire =  () => {
   document.querySelector('#order').addEventListener('click', e =>{
     e.preventDefault()
 
